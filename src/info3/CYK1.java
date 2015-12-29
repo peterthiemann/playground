@@ -8,7 +8,7 @@ public class CYK1 {
 
 	public static boolean parse(CNF grammar, String input) {
 		int n = input.length();
-		Triangle<Set<Integer>> m = new Triangle(n);
+		UpperTriangle<Set<Integer>> m = new UpperTriangle(n);
 		
 		for (int i = n - 1; i >= 0; i--) {
 			// initialize diagonal

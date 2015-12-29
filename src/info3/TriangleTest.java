@@ -10,7 +10,7 @@ public class TriangleTest {
 	@Test
 	public void test() {
 		int n = 10;
-		Triangle<Integer> out = new Triangle<Integer>(n);
+		UpperTriangle<Integer> out = new UpperTriangle<Integer>(n);
 		out.set(0, 0, 42);
 		assertEquals(new Integer(42), out.get(0, 0));
 		out.set(0, 9, 43);
