@@ -53,6 +53,21 @@ public class RStar implements Regexp {
 		}
 		return result;
 	}
+
+	@Override
+	public Set<String> generate(int nr, int size) {
+		Set<String> result = new HashSet<String>();
+		for (int i = 0; i< nr; i++) {
+			Set<String> result_i = new HashSet<String>();
+			result_i.add("");
+			int size_i = (int)(Math.random() * size + 1 + size/2);
+			for (int j = 0; j < size_i; j++) {
+				result_i = RSeq.concat(result_i, r.generate(nr, size));
+			}
+			result.addAll(result_i);
+		}
+		return result;
+	}
 	
 
 }

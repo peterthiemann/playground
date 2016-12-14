@@ -51,4 +51,11 @@ public class RSym implements Regexp {
 		return result;
 	}
 
+	@Override
+	public Set<String> generate(int nr, int size) {
+		HashSet<String> r = new HashSet<String>();
+		r.add(String.valueOf(x));
+		return r;
+	}
+
 }

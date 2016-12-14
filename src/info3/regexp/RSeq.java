@@ -62,5 +62,21 @@ public class RSeq implements Regexp {
 			result.addAll(s.step(c));
 		return result;
 	}
+
+	@Override
+	public Set<String> generate(int nr, int size) {
+		Set<String> rgen = r.generate(nr, size);
+		Set<String> sgen = s.generate(nr, size);
+		return concat(rgen, sgen);
+	}
+
+	public static Set<String> concat(Set<String> rgen, Set<String> sgen) {
+		HashSet<String> result = new HashSet<String>();
+		for(String rstr : rgen)
+			for(String sstr : sgen) {
+				result.add(rstr + sstr);
+			}
+		return result;
+	}
 	
 }

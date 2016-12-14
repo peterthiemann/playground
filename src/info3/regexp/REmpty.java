@@ -20,4 +20,11 @@ public class REmpty implements Regexp {
 		return new HashSet<Regexp>();
 	}
 
+	@Override
+	public Set<String> generate(int nr, int size) {
+		HashSet<String> r = new HashSet<String>();
+		r.add("");
+		return r;
+	}
+
 }

@@ -59,5 +59,13 @@ public class RAlt implements Regexp {
 		result.addAll(s.step(c));
 		return result;
 	}
+
+	@Override
+	public Set<String> generate(int nr, int size) {
+		Set<String> rgen = r.generate(1, 1);
+		Set<String> sgen = s.generate(1, 1);
+		rgen.addAll(sgen);
+		return rgen;
+	}
 	
 }
