@@ -57,7 +57,7 @@ public class RAlt implements Regexp {
 		Set<Regexp> result = new HashSet<Regexp>();
 		result.addAll(r.step(c));
 		result.addAll(s.step(c));
-		return resultÍ;
+		return result;
 	}
 	
 }
