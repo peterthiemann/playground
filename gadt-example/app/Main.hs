@@ -20,8 +20,8 @@ generate (s :->: t) = \s -> generate t
 
 
 -- Task B: Consider -- typed predicate logic:
--- P, Q ::= forall x:t. P | neg P | P v Q | E = F
--- encoded in the following datatype
+-- P, Q ::= forall x:t. P | neg P | P v Q | E = F | E >= F
+-- encoded in the following datatype (where we choose to implement expressions E and F by Haskell expressions rather than defining another datatype `Exp env`)
 data Pred env where
   Forall :: Bounded t => Type t -> Pred (t, env) -> Pred env
   Not    :: Pred env -> Pred env
@@ -29,7 +29,7 @@ data Pred env where
   Eq     :: Eq t => (env -> t) -> (env -> t) -> Pred env
   Le     :: Ord t => (env -> t) -> (env -> t) -> Pred env
 
--- where `env` is an environment containing variable values. The constructor `Eq` represents an equation between values of type `t` which must therefore satisfy `Eq t`. The left and right hand side of an equation is given by functions, which map the environment to a value of type `t`. The constructor `Le` is analogous for the less-than-or-equal relation.
+-- where `env` is an environment containing variable values. The constructor `Eq` represents an equation between values of type `t` which must therefore satisfy `Eq t`. The left and right hand side of an equation is given by functions, which map the environment to a value of type `t`. The constructor `Le` is analogous for the less-than-or-equal relation and its type must satisfy `Ord t`.
 
 -- Here are some example predicates:
 
@@ -41,6 +41,8 @@ p1 = Forall Bool (Forall Bool (Or (Eq fst (fst.snd)) (Not (Eq fst (fst.snd)))))
 p2 = Forall Int  (Not (Eq fst (const 0)))
 -- forall x:Int. (x = 0)
 p3 = Forall Int  (Eq fst (const 0))
+-- forall x:Int. (x >= 0)
+p4 = Forall Int  (Le (const 0) fst)
 
 -- Implement an evaluation function 
 eval :: Pred env -> env -> Bool
@@ -62,4 +64,4 @@ main = do
   putStrLn ("p1 = " ++ show (eval p1 ()))
   putStrLn ("p2 = " ++ show (eval p2 ()))
   putStrLn ("p3 = " ++ show (eval p3 ()))
-
+  putStrLn ("p4 = " ++ show (eval p4 ()))
