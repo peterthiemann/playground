@@ -1,6 +1,6 @@
 /** concrete types for protocols */
 /** payload types modeled after JSON */
-type Type =
+export type Type =
     { type: "any" } |
     { type: "number" } |
     { type: "string" } | 
@@ -17,12 +17,12 @@ type Type =
 
 /** protocol types */
 /** direction of transmission */
-type Dir = "send" | "recv"
+export type Dir = "send" | "recv"
 /** label for protocol alternatives */
-type Label = string
+export type Label = string
 
 /** construction of protocols */
-type Session =
+export type Session =
     /** single shot: transfer payload and continue as cont */
   { kind: "single"; dir: Dir; payload: Type; cont: Session }
     /** choice: transfer tag and continue as alternatives[tag] */
@@ -33,3 +33,19 @@ type Session =
 | { kind: "ref"; name: string }
     /** terminate protocol */
 | { kind: "end" }
+
+export type Program = 
+      { command: "send",
+        get_value: () => any,
+        cont: Program }
+    | { command: "recv", 
+        put_value: (v: any) => void, 
+        cont: Program }
+    | { command: "select", 
+        get_value: () => string, 
+        cont: Program }
+    | { command: "choose", 
+        do_match: (label: Label) => void,
+        alt_cont: Record<Label, Program> }
+    | { command: "end" }
+
