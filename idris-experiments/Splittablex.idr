@@ -5,31 +5,30 @@ import Linear -- local version of System.Concurrency.Linear
 
 import Sessionx
 
-||| here we fake context-free session types using regular session types that close with a `Ret`
-||| these are true borrow types where borrows of type `Ret` can simply be dropped.
+||| borrowed session types are regular session types that end with a `Ret`
 data BSession : Type where
-  Send : (ty : Type) -> (s : BSession) -> BSession
-  Recv : (ty : Type) -> (s : BSession) -> BSession
+  Send : (ty : Type) -> (r : BSession) -> BSession
+  Recv : (ty : Type) -> (r : BSession) -> BSession
   Ret  : BSession
 
-||| composition of borrowed session and real session
+||| composition of borrowed session and owned session
 comp : BSession -> Session -> Session
-comp (Send ty s1) s2 = Send ty (comp s1 s2)
-comp (Recv ty s1) s2 = Recv ty (comp s1 s2)
-comp Ret s2          = s2
+comp (Send ty r) s = Send ty (comp r s)
+comp (Recv ty r) s = Recv ty (comp r s)
+comp Ret s         = s
 
 ||| composition of two borrowed sessions
 bcomp : BSession -> BSession -> BSession
-bcomp (Send ty s1) s2 = Send ty (bcomp s1 s2)
-bcomp (Recv ty s1) s2 = Recv ty (bcomp s1 s2)
-bcomp Ret s2          = s2
+bcomp (Send ty r1) r2 = Send ty (bcomp r1 r2)
+bcomp (Recv ty r1) r2 = Recv ty (bcomp r1 r2)
+bcomp Ret r2          = r2
 
 ||| associativity of `comp` over `bcomp`
-compBcompAssoc : (s1 : BSession) -> (s2 : BSession) -> (s3 : Session) ->
-   comp s1 (comp s2 s3) === comp (bcomp s1 s2) s3
-compBcompAssoc (Send ty s1) s2 s3 = cong (Send ty) (compBcompAssoc s1 s2 s3)
-compBcompAssoc (Recv ty s1) s2 s3 = cong (Recv ty) (compBcompAssoc s1 s2 s3)
-compBcompAssoc Ret s2 s3 = Refl
+compBcompAssoc : (r1 : BSession) -> (r2 : BSession) -> (s : Session) ->
+   comp r1 (comp r2 s) === comp (bcomp r1 r2) s
+compBcompAssoc (Send ty r1) r2 s = cong (Send ty) (compBcompAssoc r1 r2 s)
+compBcompAssoc (Recv ty r1) r2 s = cong (Recv ty) (compBcompAssoc r1 r2 s)
+compBcompAssoc Ret r2 s = Refl
 
 ||| A cell is a one-shot channel to synchronize uses of an underlying primitive channel.
 ||| Cells are higher-order sessions that carry (primitive) channels.
@@ -39,19 +38,19 @@ Cell ty = Recv ty Wait
 read : LinearIO io =>
   Channel (Cell a) -@
   L1 io a
-read ch = do
-  (val # ch) <- recv ch
-  wait ch
+read cell = do
+  (val # cell) <- recv cell
+  wait cell
   pure1 val
 
 write :
   a -@
   Channel (Dual (Cell a)) -@
   L1 IO ()
-write x ch = do
+write x cell = do
   _ <- fork1 $ do
-    ch <- send ch x
-    close ch
+    cell <- send cell x
+    close cell
   pure1 ()
 
 ||| type of the (single) owning reference to a session
@@ -71,10 +70,10 @@ data Borrow : BSession -> Type where
            Channel (Dual (Cell (Channel s2))) -@ 
            Borrow s1
 
-mkSplittable :
+wrap :
   Channel s ->
   L1 IO (Owner s)
-mkSplittable {s} ch = do
+wrap {s} ch = do
   (cin # cout) <- makeChannel (Cell (Channel s))
   write ch cout
   pure1 (MkOwner cin)

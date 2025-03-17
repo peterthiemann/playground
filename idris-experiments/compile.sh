@@ -1,1 +1,1 @@
-idris2 -p linear -c CSession.idr
+idris2 -p linear -c Splittablex.idr
