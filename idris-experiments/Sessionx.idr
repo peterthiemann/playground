@@ -28,7 +28,6 @@ namespace Session
   data Session : Type where
     Send : (ty : Type) -> (s : Session) -> Session
     Recv : (ty : Type) -> (s : Session) -> Session
-    -- Ret  : Session
     Close  : Session
     Wait : Session
 
@@ -38,7 +37,6 @@ namespace Session
   Dual : Session -> Session
   Dual (Send ty s) = Recv ty (Dual s)
   Dual (Recv ty s) = Send ty (Dual s)
-  -- Dual Ret = Ret
   Dual Close = Wait
   Dual Wait = Close
 
@@ -47,7 +45,6 @@ namespace Session
   dualInvolutive : (s : Session) -> Dual (Dual s) === s
   dualInvolutive (Send ty s) = cong (Send ty) (dualInvolutive s)
   dualInvolutive (Recv ty s) = cong (Recv ty) (dualInvolutive s)
-  -- dualInvolutive Ret = Refl
   dualInvolutive Close = Refl
   dualInvolutive Wait = Refl
 
@@ -58,7 +55,6 @@ namespace Session
 SendTypes : Session -> List Type
 SendTypes (Send ty s) = ty :: SendTypes s
 SendTypes (Recv ty s) = SendTypes s
--- SendTypes Ret = []
 SendTypes Close = []
 SendTypes Wait = []
 
@@ -69,7 +65,6 @@ SendTypes Wait = []
 RecvTypes : Session -> List Type
 RecvTypes (Send ty s) = RecvTypes s
 RecvTypes (Recv ty s) = ty :: RecvTypes s
--- RecvTypes Ret = []
 RecvTypes Close = []
 RecvTypes Wait = []
 
@@ -79,7 +74,6 @@ RecvTypes Wait = []
 RecvDualTypes : (s : Session) -> RecvTypes (Dual s) === SendTypes s
 RecvDualTypes (Send ty s) = cong (ty ::) (RecvDualTypes s)
 RecvDualTypes (Recv ty s) = RecvDualTypes s
--- RecvDualTypes Ret = Refl
 RecvDualTypes Close = Refl
 RecvDualTypes Wait = Refl
 
@@ -89,7 +83,6 @@ RecvDualTypes Wait = Refl
 SendDualTypes : (s : Session) -> SendTypes (Dual s) === RecvTypes s
 SendDualTypes (Send ty s) = SendDualTypes s
 SendDualTypes (Recv ty s) = cong (ty ::) (SendDualTypes s)
--- SendDualTypes Ret = Refl
 SendDualTypes Close = Refl
 SendDualTypes Wait = Refl
 
