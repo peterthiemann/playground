@@ -198,3 +198,147 @@ assume: work_price = 0.19 * kwh
 return: base_price + work_price
 finish:
 ```
+
+## Afterthoughts
+
+* Each expression hole has a type
+* Hole filling operations only work with existing entities (e.g., variables) and require type compatibility
+
+I think it would be better to introduce local variables with intro.
+
+```
+intro: 
+	base_price: float
+	work_price: float
+```
+
+Internal
+
+```
+def cheap_energy (kwh : int) -> float:
+    base_price : float = [1]
+	work_price : float = [2]
+    [3]
+	return [4]
+```
+
+Command
+
+```
+constant: 4.9
+```
+
+(Error if the constant does not fit the expected type.)
+
+
+Result:
+
+```
+def cheap_energy (kwh : int) -> float:
+    base_price : float = 4.9
+	work_price : float = [1]
+    [2]
+	return [3]
+```
+
+Command
+
+```
+binop: *
+```
+
+(Error if `*` does not exist or if its return type is not `float`.)
+
+Result:
+
+```
+def cheap_energy (kwh : int) -> float:
+    base_price : float = 4.9
+	work_price : float = [1] * [2]
+	[3]
+	return [4]
+```
+
+Command
+
+```
+constant: 0.19
+```
+
+Result:
+
+```
+def cheap_energy (kwh : int) -> float:
+    base_price : float = 4.9
+	work_price : float = 0.19 * [1]
+	[2]
+	return [3]
+```
+
+Command
+
+```
+use: kwh
+```
+
+(Error if the variable does not exist or if its type does not fit the type of the hole.)
+
+Result:
+
+```
+def cheap_energy (kwh : int) -> float:
+    base_price : float = 4.9
+	work_price : float = 0.19 * kwh
+	[1]
+	return [2]
+```
+
+Command
+
+```
+binop: +
+```
+
+(Operators on next available expression hole)
+
+Result:
+
+```
+def cheap_energy (kwh : int) -> float:
+    base_price : float = 4.9
+	work_price : float = 0.19 * kwh
+	[1]
+	return [2] + [3]
+```
+
+Command
+
+```
+use: base_price
+use: work_price
+```
+
+Result
+
+```
+def cheap_energy (kwh : int) -> float:
+    base_price : float = 4.9
+	work_price : float = 0.19 * kwh
+	[1]
+	return base_price + work_price
+```
+
+Command
+
+```
+finish:
+```
+
+Result
+
+```
+def cheap_energy (kwh : int) -> float:
+    base_price : float = 4.9
+	work_price : float = 0.19 * kwh
+	return base_price + work_price
+```
